@@ -44,7 +44,6 @@ body {
     stroke-width: 2;
     stroke-dasharray: 200;
     stroke-dashoffset: 200;
-    animation: drawBand 5s ease-in-out infinite;
     will-change: stroke-dashoffset;
 }
 
@@ -54,7 +53,6 @@ body {
     stroke-width: 1.5;
     opacity: 0;
     transform-origin: center;
-    animation: pulseGem 5s ease-in-out infinite;
     will-change: opacity, transform;
 }
 

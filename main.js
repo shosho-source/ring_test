@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
+import { HDRLoader } from 'three/examples/jsm/loaders/HDRLoader.js';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -37,24 +37,45 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.2;
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFShadowMap;
 
 const loadingManager = new THREE.LoadingManager();
 
-loadingManager.onLoad = () => {
-    const loader = document.getElementById('loader');
-    if (loader) {
-        gsap.to(loader, { 
-            opacity: 0, 
-            delay: 3.5, // 2 extra seconds of pause
-            duration: 1.5, 
-            onComplete: () => loader.style.display = 'none' 
+let assetsLoaded = false;
+let ringsBuilt = false;
+
+function checkReady() {
+    if (assetsLoaded && ringsBuilt) {
+        const bands = document.querySelectorAll('.ring-band');
+        const gems = document.querySelectorAll('.ring-gem');
+        
+        bands.forEach(band => {
+            band.style.animation = 'drawBand 5s ease-in-out forwards';
         });
+        
+        gems.forEach(gem => {
+            gem.style.animation = 'pulseGem 5s ease-in-out forwards';
+        });
+        
+        const loader = document.getElementById('loader');
+        if (loader) {
+            gsap.to(loader, { 
+                opacity: 0, 
+                delay: 4.5, // Wait until animation is almost finished
+                duration: 2.5, // Much smoother, slower fade transition
+                onComplete: () => loader.style.display = 'none' 
+            });
+        }
     }
+}
+
+loadingManager.onLoad = () => {
+    assetsLoaded = true;
+    checkReady();
 };
 
 const gltfLoader = new GLTFLoader(loadingManager);
-const rgbeLoader = new RGBELoader(loadingManager);
+const rgbeLoader = new HDRLoader(loadingManager);
 const textureLoader = new THREE.TextureLoader(loadingManager);
 
 // Load wood textures
@@ -207,7 +228,7 @@ gltfLoader.load('/ring.gltf', (gltf) => {
     // Build river of rings asynchronously to prevent blocking the loading animation
     let ringsCreated = 0;
     const totalRings = 350;
-    const chunkSize = 25; // Small chunks to keep framerate completely smooth
+    const chunkSize = 2; // Extremely small chunks to guarantee zero loading lag
     
     function createRingChunk() {
         const limit = Math.min(ringsCreated + chunkSize, totalRings);
@@ -247,6 +268,9 @@ gltfLoader.load('/ring.gltf', (gltf) => {
         ringsCreated += chunkSize;
         if (ringsCreated < totalRings) {
             requestAnimationFrame(createRingChunk);
+        } else {
+            ringsBuilt = true;
+            checkReady();
         }
     }
     
@@ -299,11 +323,11 @@ function setupAnimations() {
       .to(riverGroup.position, { y: -0.5, ease: "power1.inOut" }, "<"); // Let it flow gracefully in the background
 }
 
-const clock = new THREE.Clock();
+const startTime = performance.now();
 
 function animate() {
     requestAnimationFrame(animate);
-    const time = clock.getElapsedTime();
+    const time = (performance.now() - startTime) / 1000;
 
     if (ringGroup.children.length > 0) {
         
