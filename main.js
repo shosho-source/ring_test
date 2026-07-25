@@ -227,7 +227,8 @@ gltfLoader.load('/ring.gltf', (gltf) => {
 
     // Build river of rings asynchronously to prevent blocking the loading animation
     let ringsCreated = 0;
-    const totalRings = 350;
+    const isMobile = window.innerWidth <= 768;
+    const totalRings = isMobile ? 150 : 350; // Reduce rings on mobile for performance
     const chunkSize = 2; // Extremely small chunks to guarantee zero loading lag
     
     function createRingChunk() {
@@ -287,40 +288,83 @@ window.addEventListener('mousemove', (event) => {
 });
 
 function setupAnimations() {
-    const tl = gsap.timeline({
-        scrollTrigger: {
-            trigger: ".content-wrapper",
-            start: "top top",
-            end: "bottom bottom",
-            scrub: 2.5,
-        }
+    let mm = gsap.matchMedia();
+
+    mm.add("(min-width: 769px)", () => {
+        // Desktop Animation (Original)
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: ".content-wrapper",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 2.5,
+            }
+        });
+
+        tl.to(ringGroup.position, { x: -1.5, y: 0.5, z: 1.5, ease: "power1.inOut" })
+          .to(ringGroup.rotation, { x: Math.PI * 1.5, y: -Math.PI * 0.5, ease: "power1.inOut" }, "<")
+        
+        // Heritage
+          .to(ringGroup.position, { x: 1.2, y: -0.2, z: 0, ease: "power1.inOut" })
+          .to(ringGroup.rotation, { x: -Math.PI * 0.2, y: Math.PI * 1.2, ease: "power1.inOut" }, "<")
+        
+        // Sustainability
+          .to(ringGroup.position, { x: -1.2, y: 0.2, z: -1, ease: "power1.inOut" })
+          .to(ringGroup.rotation, { x: Math.PI * 0.8, y: -Math.PI * 1.8, ease: "power1.inOut" }, "<")
+          
+        // Details
+          .to(ringGroup.position, { x: 0.8, y: 0.8, z: 1, ease: "power1.inOut" })
+          .to(ringGroup.rotation, { x: Math.PI * 2.1, y: Math.PI * 0.5, ease: "power1.inOut" }, "<")
+
+        // River View
+          .to(ringGroup.position, { x: 0, y: 1.5, z: -1, ease: "power1.inOut" })
+          .to(ringGroup.rotation, { x: Math.PI * 3, y: Math.PI * 2, ease: "power1.inOut" }, "<")
+          .to(ringGroup.scale, { x: 0.6, y: 0.6, z: 0.6, ease: "power1.inOut" }, "<")
+          .to(riverGroup.position, { y: -1.5, ease: "power1.inOut" }, "<")
+          
+        // Contact
+          .to(ringGroup.position, { x: 0, y: 0.5, z: 1.5, ease: "power1.inOut" })
+          .to(ringGroup.rotation, { x: Math.PI * 4, y: Math.PI * 2.5, ease: "power1.inOut" }, "<")
+          .to(riverGroup.position, { y: -0.5, ease: "power1.inOut" }, "<");
     });
 
-    tl.to(ringGroup.position, { x: -1.5, y: 0.5, z: 1.5, ease: "power1.inOut" })
-      .to(ringGroup.rotation, { x: Math.PI * 1.5, y: -Math.PI * 0.5, ease: "power1.inOut" }, "<")
-    
-    // Heritage
-      .to(ringGroup.position, { x: 1.2, y: -0.2, z: 0, ease: "power1.inOut" })
-      .to(ringGroup.rotation, { x: -Math.PI * 0.2, y: Math.PI * 1.2, ease: "power1.inOut" }, "<")
-    
-    // Sustainability
-      .to(ringGroup.position, { x: -1.2, y: 0.2, z: -1, ease: "power1.inOut" })
-      .to(ringGroup.rotation, { x: Math.PI * 0.8, y: -Math.PI * 1.8, ease: "power1.inOut" }, "<")
-      
-    // Details
-      .to(ringGroup.position, { x: 0.8, y: 0.8, z: 1, ease: "power1.inOut" })
-      .to(ringGroup.rotation, { x: Math.PI * 2.1, y: Math.PI * 0.5, ease: "power1.inOut" }, "<")
+    mm.add("(max-width: 768px)", () => {
+        // Mobile Animation (Centered)
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: ".content-wrapper",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 2.5,
+            }
+        });
 
-    // River View
-      .to(ringGroup.position, { x: 0, y: 1.5, z: -1, ease: "power1.inOut" })
-      .to(ringGroup.rotation, { x: Math.PI * 3, y: Math.PI * 2, ease: "power1.inOut" }, "<")
-      .to(ringGroup.scale, { x: 0.6, y: 0.6, z: 0.6, ease: "power1.inOut" }, "<")
-      .to(riverGroup.position, { y: -1.5, ease: "power1.inOut" }, "<")
-      
-    // Contact
-      .to(ringGroup.position, { x: 0, y: 0.5, z: 1.5, ease: "power1.inOut" })
-      .to(ringGroup.rotation, { x: Math.PI * 4, y: Math.PI * 2.5, ease: "power1.inOut" }, "<")
-      .to(riverGroup.position, { y: -0.5, ease: "power1.inOut" }, "<"); // Let it flow gracefully in the background
+        tl.to(ringGroup.position, { x: 0, y: 0.5, z: 1.5, ease: "power1.inOut" })
+          .to(ringGroup.rotation, { x: Math.PI * 1.5, y: -Math.PI * 0.5, ease: "power1.inOut" }, "<")
+        
+        // Heritage
+          .to(ringGroup.position, { x: 0, y: -0.2, z: 0, ease: "power1.inOut" })
+          .to(ringGroup.rotation, { x: -Math.PI * 0.2, y: Math.PI * 1.2, ease: "power1.inOut" }, "<")
+        
+        // Sustainability
+          .to(ringGroup.position, { x: 0, y: 0.2, z: -1, ease: "power1.inOut" })
+          .to(ringGroup.rotation, { x: Math.PI * 0.8, y: -Math.PI * 1.8, ease: "power1.inOut" }, "<")
+          
+        // Details
+          .to(ringGroup.position, { x: 0, y: 0.8, z: 1, ease: "power1.inOut" })
+          .to(ringGroup.rotation, { x: Math.PI * 2.1, y: Math.PI * 0.5, ease: "power1.inOut" }, "<")
+
+        // River View
+          .to(ringGroup.position, { x: 0, y: 1.5, z: -1, ease: "power1.inOut" })
+          .to(ringGroup.rotation, { x: Math.PI * 3, y: Math.PI * 2, ease: "power1.inOut" }, "<")
+          .to(ringGroup.scale, { x: 0.6, y: 0.6, z: 0.6, ease: "power1.inOut" }, "<")
+          .to(riverGroup.position, { y: -1.5, ease: "power1.inOut" }, "<")
+          
+        // Contact
+          .to(ringGroup.position, { x: 0, y: 0.5, z: 1.5, ease: "power1.inOut" })
+          .to(ringGroup.rotation, { x: Math.PI * 4, y: Math.PI * 2.5, ease: "power1.inOut" }, "<")
+          .to(riverGroup.position, { y: -0.5, ease: "power1.inOut" }, "<");
+    });
 }
 
 const startTime = performance.now();
