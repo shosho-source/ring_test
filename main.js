@@ -30,7 +30,8 @@ camera.position.z = 5;
 const renderer = new THREE.WebGLRenderer({
     canvas: canvas,
     antialias: true,
-    alpha: true
+    alpha: true,
+    powerPreference: "high-performance"
 });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -79,6 +80,7 @@ const ringGroup = new THREE.Group();
 scene.add(ringGroup);
 
 let riverRings = [];
+let instancedMeshes = [];
 const riverGroup = new THREE.Group();
 scene.add(riverGroup);
 riverGroup.position.y = -10; // Hidden initially
@@ -197,60 +199,72 @@ gltfLoader.load('/ring.gltf', (gltf) => {
     ring.scale.set(scale, scale, scale);
     ring.position.sub(center.multiplyScalar(scale));
     
+    // Add main ring
     ringGroup.add(ring);
-    
     ringGroup.rotation.x = Math.PI * 0.1;
     ringGroup.rotation.y = -Math.PI * 0.2;
     
-    setupAnimations();
+    // Must update matrix world to bake the global transform into the instanced geometries
+    ring.updateMatrixWorld(true);
 
-    // Build river of rings asynchronously to prevent blocking the loading animation
-    let ringsCreated = 0;
     const totalRings = 350;
-    const chunkSize = 25; // Small chunks to keep framerate completely smooth
     
-    function createRingChunk() {
-        const limit = Math.min(ringsCreated + chunkSize, totalRings);
-        for(let i=ringsCreated; i<limit; i++) {
-            const clonedRing = ring.clone();
+    // Build InstancedMeshes
+    ring.traverse((child) => {
+        if (child.isMesh) {
+            const instancedGeom = child.geometry.clone();
+            instancedGeom.applyMatrix4(child.matrixWorld);
             
-            const s = 0.03 + Math.random() * 0.05; // much smaller rings
-            clonedRing.scale.set(s, s, s);
-            clonedRing.traverse((child) => {
-                if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                }
-            });
-            riverGroup.add(clonedRing);
+            const im = new THREE.InstancedMesh(instancedGeom, woodMaterial, totalRings);
+            im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+            im.castShadow = true;
+            im.receiveShadow = true;
             
-            // Physics Body
-            const radius = s * 1.2; 
-            const body = new CANNON.Body({
-                mass: 1,
-                shape: new CANNON.Sphere(radius),
-                material: ringPhysMaterial,
-                angularDamping: 0.95, // Heavy damping for slow-mo spin
-                linearDamping: 0.1,
-                position: new CANNON.Vec3(
-                    (Math.random() - 0.5) * 40,
-                    (Math.random() - 0.5) * 12,
-                    -1.5 + Math.random()
-                )
-            });
-            
-            body.quaternion.setFromEuler(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
-            world.addBody(body);
-            
-            riverRings.push({ mesh: clonedRing, body: body });
+            instancedMeshes.push(im);
+            riverGroup.add(im);
         }
-        ringsCreated += chunkSize;
-        if (ringsCreated < totalRings) {
-            requestAnimationFrame(createRingChunk);
-        }
+    });
+
+    const matrix = new THREE.Matrix4();
+    const position = new THREE.Vector3();
+    const quaternion = new THREE.Quaternion();
+    const scaleVec = new THREE.Vector3();
+
+    // Setup instances
+    for (let i = 0; i < totalRings; i++) {
+        const s = 0.03 + Math.random() * 0.05;
+        
+        position.set(
+            (Math.random() - 0.5) * 40,
+            (Math.random() - 0.5) * 12,
+            -1.5 + Math.random()
+        );
+        quaternion.setFromEuler(new THREE.Euler(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI));
+        scaleVec.set(s, s, s);
+        
+        matrix.compose(position, quaternion, scaleVec);
+        instancedMeshes.forEach(im => im.setMatrixAt(i, matrix));
+        
+        // Physics Body
+        const radius = s * 1.2; 
+        const body = new CANNON.Body({
+            mass: 1,
+            shape: new CANNON.Sphere(radius),
+            material: ringPhysMaterial,
+            angularDamping: 0.95,
+            linearDamping: 0.1,
+            position: new CANNON.Vec3(position.x, position.y, position.z)
+        });
+        
+        body.quaternion.set(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
+        world.addBody(body);
+        
+        riverRings.push({ index: i, body: body, scale: scaleVec.clone() });
     }
     
-    createRingChunk();
+    instancedMeshes.forEach(im => im.instanceMatrix.needsUpdate = true);
+    
+    setupAnimations();
 });
 
 const mouse = { x: 0, y: 0 };
@@ -329,7 +343,8 @@ function animate() {
     }
     
     // Physics step
-    world.step(1/60);
+    const delta = Math.min(clock.getDelta(), 0.1);
+    world.step(1/60, delta, 3);
     
     // Mouse repeller logic
     raycaster.setFromCamera(mouse, camera);
@@ -347,6 +362,10 @@ function animate() {
     }
 
     // Sync bodies
+    const matrix = new THREE.Matrix4();
+    const position = new THREE.Vector3();
+    const quaternion = new THREE.Quaternion();
+    
     riverRings.forEach(r => {
         // Infinite flow wrap-around
         if (r.body.position.x > 15) {
@@ -357,9 +376,15 @@ function animate() {
             r.body.angularVelocity.set(0, 0, 0);
         }
         
-        r.mesh.position.copy(r.body.position);
-        r.mesh.quaternion.copy(r.body.quaternion);
+        position.copy(r.body.position);
+        quaternion.copy(r.body.quaternion);
+        matrix.compose(position, quaternion, r.scale);
+        
+        instancedMeshes.forEach(im => {
+            im.setMatrixAt(r.index, matrix);
+        });
     });
+    instancedMeshes.forEach(im => im.instanceMatrix.needsUpdate = true);
 
     renderer.render(scene, camera);
 }
