@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxurious 3D Ring</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Inter:wght@300;400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <div id="loader">
+        <svg viewBox="0 0 100 100" class="ring-loader">
+            <defs>
+                <linearGradient id="luxury-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#C89F7D" />
+                    <stop offset="50%" stop-color="#FDFBF7" />
+                    <stop offset="100%" stop-color="#C89F7D" />
+                </linearGradient>
+            </defs>
+            <ellipse cx="50" cy="50" rx="35" ry="12" class="ring-band" />
+            <ellipse cx="50" cy="56" rx="35" ry="12" class="ring-band" />
+            <polygon points="50,27 56,35 50,40 44,35" class="ring-gem" />
+        </svg>
+    </div>
+
+    <canvas id="webgl-canvas"></canvas>
+
+    <div class="content-wrapper">
+        <header>
+            <div class="logo">AURA</div>
+            <nav>
+                <a href="#hero">Collection</a>
+                <a href="#craftsmanship">Craft</a>
+                <a href="#details">Details</a>
+            </nav>
+        </header>
+
+        <section id="hero" class="section">
+            <div class="section-content">
+                <h1>Timeless<br>Elegance</h1>
+                <p class="subtitle">Discover the pinnacle of minimalist luxury.</p>
+            </div>
+        </section>
+
+        <section id="craftsmanship" class="section right-align">
+            <div class="section-content">
+                <h2>Master Craftsmanship</h2>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore
+                    et dolore magna aliqua.</p>
+            </div>
+        </section>
+
+        <section id="heritage" class="section left-align">
+            <div class="section-content">
+                <h2>Our Heritage</h2>
+                <p>Decades of passion shaped into a single band. We source the finest materials to bring your visions
+                    into reality, maintaining an unbroken tradition of excellence.</p>
+            </div>
+        </section>
+
+        <section id="sustainability" class="section right-align">
+            <div class="section-content">
+                <h2>Ethical Sourcing</h2>
+                <p>Every gem and ounce of gold is responsibly harvested. We believe that true luxury does not come at
+                    the expense of our planet.</p>
+            </div>
+        </section>
+
+        <section id="details" class="section left-align">
+            <div class="section-content">
+                <h2>Exquisite Details</h2>
+                <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                    pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit
+                    anim id est laborum.</p>
+            </div>
+        </section>
+
+        <section id="river-view" class="section center-align">
+            <div class="section-content">
+                <h2>The Flow</h2>
+                <p>A continuous stream of craftsmanship.</p>
+            </div>
+        </section>
+
+        <section id="contact" class="section center-align">
+            <div class="section-content">
+                <h2>Get in Touch</h2>
+                <p>Contact us for custom commissions and inquiries.</p>
+                <a href="mailto:hello@aurajewelry.com" class="contact-btn">hello@aurajewelry.com</a>
+            </div>
+        </section>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+</body>
+
+</html>

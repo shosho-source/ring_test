@@ -1,0 +1,221 @@
+:root {
+    --bg-color: #231C14; /* Deep Espresso Brown */
+    --text-color: #FDFBF7; /* Ivory */
+    --accent-color: #C89F7D; /* Soft Wood */
+    --font-heading: 'Cormorant Garamond', serif;
+    --font-body: 'Inter', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+#loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--bg-color);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ring-loader {
+    width: 120px;
+    height: 120px;
+}
+
+.ring-band {
+    fill: none;
+    stroke: url(#luxury-grad);
+    stroke-width: 2;
+    stroke-dasharray: 200;
+    stroke-dashoffset: 200;
+    animation: drawBand 5s ease-in-out infinite;
+    will-change: stroke-dashoffset;
+}
+
+.ring-gem {
+    fill: none;
+    stroke: url(#luxury-grad);
+    stroke-width: 1.5;
+    opacity: 0;
+    transform-origin: center;
+    animation: pulseGem 5s ease-in-out infinite;
+    will-change: opacity, transform;
+}
+
+@keyframes drawBand {
+    0% { stroke-dashoffset: 200; }
+    50% { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: -200; }
+}
+
+@keyframes pulseGem {
+    0%, 15% { opacity: 0; transform: translateY(-3px) scale(0.9); }
+    50% { opacity: 1; transform: translateY(0) scale(1); }
+    85%, 100% { opacity: 0; transform: translateY(3px) scale(0.9); }
+}
+
+#webgl-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.content-wrapper {
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+}
+
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    padding: 2rem 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: auto;
+    z-index: 10;
+}
+
+.logo {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+}
+
+nav a {
+    color: var(--text-color);
+    text-decoration: none;
+    margin-left: 2rem;
+    font-size: 0.9rem;
+    font-weight: 300;
+    letter-spacing: 1px;
+    transition: opacity 0.3s;
+}
+
+nav a:hover {
+    opacity: 0.7;
+}
+
+.section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 10vw;
+    pointer-events: auto;
+}
+
+.section-content {
+    max-width: 500px;
+}
+
+h1 {
+    font-family: var(--font-heading);
+    font-size: 6rem;
+    font-weight: 300;
+    line-height: 1;
+    margin-bottom: 1.5rem;
+}
+
+h2 {
+    font-family: var(--font-heading);
+    font-size: 3.5rem;
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+}
+
+p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    font-weight: 300;
+    opacity: 0.8;
+}
+
+.subtitle {
+    font-size: 1.25rem;
+    letter-spacing: 0.5px;
+}
+
+.right-align {
+    align-items: flex-end;
+    text-align: right;
+}
+
+.left-align {
+    align-items: flex-start;
+    text-align: left;
+}
+
+.center-align {
+    align-items: center;
+    text-align: center;
+}
+
+#contact .section-content {
+    margin-top: 25vh;
+}
+
+.contact-btn {
+    display: inline-block;
+    margin-top: 1.5rem;
+    padding: 0.8rem 2.5rem;
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.contact-btn:hover {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+}
+
+footer {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    padding-bottom: 4rem;
+    pointer-events: auto;
+}
+
+.footer-content {
+    text-align: center;
+}
+
+.footer-content h2 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.footer-content p {
+    font-size: 0.9rem;
+    opacity: 0.5;
+}
