@@ -315,6 +315,11 @@ function setupAnimations() {
 
 const clock = new THREE.Clock();
 
+// Reusable objects for matrix calculations to prevent memory leaks/GC stutters
+const syncMatrix = new THREE.Matrix4();
+const syncPos = new THREE.Vector3();
+const syncQuat = new THREE.Quaternion();
+
 function animate() {
     requestAnimationFrame(animate);
     const time = clock.getElapsedTime();
@@ -343,8 +348,7 @@ function animate() {
     }
     
     // Physics step
-    const delta = Math.min(clock.getDelta(), 0.1);
-    world.step(1/60, delta, 3);
+    world.step(1/60);
     
     // Mouse repeller logic
     raycaster.setFromCamera(mouse, camera);
@@ -362,10 +366,6 @@ function animate() {
     }
 
     // Sync bodies
-    const matrix = new THREE.Matrix4();
-    const position = new THREE.Vector3();
-    const quaternion = new THREE.Quaternion();
-    
     riverRings.forEach(r => {
         // Infinite flow wrap-around
         if (r.body.position.x > 15) {
@@ -376,12 +376,12 @@ function animate() {
             r.body.angularVelocity.set(0, 0, 0);
         }
         
-        position.copy(r.body.position);
-        quaternion.copy(r.body.quaternion);
-        matrix.compose(position, quaternion, r.scale);
+        syncPos.copy(r.body.position);
+        syncQuat.copy(r.body.quaternion);
+        syncMatrix.compose(syncPos, syncQuat, r.scale);
         
         instancedMeshes.forEach(im => {
-            im.setMatrixAt(r.index, matrix);
+            im.setMatrixAt(r.index, syncMatrix);
         });
     });
     instancedMeshes.forEach(im => im.instanceMatrix.needsUpdate = true);
