@@ -46,7 +46,7 @@ loadingManager.onLoad = () => {
     if (loader) {
         gsap.to(loader, { 
             opacity: 0, 
-            delay: 1.5,
+            delay: 3.5, // 2 extra seconds of pause
             duration: 1.5, 
             onComplete: () => loader.style.display = 'none' 
         });
